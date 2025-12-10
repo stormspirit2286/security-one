@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +21,9 @@ import vn.duynv.secutityone.payload.request.UserLoginDto;
 import vn.duynv.secutityone.payload.response.AuthResponse;
 import vn.duynv.secutityone.repository.UserRepository;
 import vn.duynv.secutityone.service.AuthService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +51,13 @@ public class AuthServiceImpl implements AuthService {
                 .gender(userDto.getGender())
                 .build();
         User userSaved = userRepository.save(userEntity);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(userSaved.getRole().name()));
+
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDto.getEmail(),
-                userDto.getPassword()
+                userDto.getPassword(),
+                authorities
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return AuthResponse.builder()
@@ -69,9 +78,13 @@ public class AuthServiceImpl implements AuthService {
             throw new ApiException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
+
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userLoginDto.getEmail(),
-                userLoginDto.getPassword()
+                userLoginDto.getPassword(),
+                authorities
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

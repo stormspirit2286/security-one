@@ -40,7 +40,10 @@ public class JwtValidator extends OncePerRequestFilter {
                 String email =  String.valueOf(claims.get("email"));
                 String authorities = String.valueOf(claims.get("authorities"));
 
-                List<GrantedAuthority> grantedAuthorities = Arrays.stream(authorities.split(","))
+                List<GrantedAuthority> grantedAuthorities = authorities == null || authorities.isEmpty() || authorities.equals("null")
+                        ? List.of()
+                        : Arrays.stream(authorities.split(","))
+                        .filter(auth -> !auth.isBlank())
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
