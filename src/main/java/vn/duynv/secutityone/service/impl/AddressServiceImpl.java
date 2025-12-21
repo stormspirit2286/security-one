@@ -9,9 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.duynv.secutityone.mapper.AddressMapper;
 import vn.duynv.secutityone.modal.Address;
+import vn.duynv.secutityone.modal.User;
+import vn.duynv.secutityone.modal.UserPrincipal;
 import vn.duynv.secutityone.payload.request.CreationAddressDto;
 import vn.duynv.secutityone.payload.response.AddressResponse;
 import vn.duynv.secutityone.repository.AddressRepository;
+import vn.duynv.secutityone.repository.UserRepository;
 import vn.duynv.secutityone.service.AddressService;
 
 @Service
@@ -20,13 +23,23 @@ import vn.duynv.secutityone.service.AddressService;
 public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
+    private final UserRepository userRepository;
 
     @Override
     public AddressResponse createNewAddress(CreationAddressDto addressDto) {
+        UserPrincipal userPrincipal = getCurrentUserPrincipal();
+        User user = userRepository.getReferenceById(userPrincipal.getUserId());
         Address address = addressMapper.toEntity(addressDto);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        log.info("Creating address for user {}", username);
+        address.setUser(user);
+
+        if (Boolean.TRUE.equals(addressDto.getIsDefault())) {
+            address.setIsDefault(true);
+        }
         return addressMapper.toResponse(addressRepository.save(address));
+    }
+
+    private UserPrincipal getCurrentUserPrincipal() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (UserPrincipal) authentication.getPrincipal();
     }
 }
