@@ -1,6 +1,9 @@
 package vn.duynv.secutityone.exception;
 
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
     // Auth
     INVALID_CREDENTIALS(1001, "Username or password is invalid"),
@@ -14,7 +17,11 @@ public enum ErrorCode {
 
     // Common
     VALIDATION_ERROR(9001, "Input data is invalid"),
-    INTERNAL_SERVER_ERROR(9999, "System error");
+    INTERNAL_SERVER_ERROR(9999, "System error"),
+
+    // Category
+    SLUG_ALREADY_EXISTS(3001, "Slug already exists"),
+    ;
 
     private final int code;
     private final String message;
@@ -24,6 +31,4 @@ public enum ErrorCode {
         this.message = message;
     }
 
-    public int getCode() { return code; }
-    public String getMessage() { return message; }
 }
